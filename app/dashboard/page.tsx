@@ -173,13 +173,13 @@ export default function Dashboard() {
           <div className="p-4">
             <header className="flex justify-between items-center mb-6 py-2 border-b border-[#333333]">
               <div className="flex items-center">
-                <h1 className="text-xl font-bold text-[#00ff00]">TELEPATH</h1>
+                <h1 className="text-xl font-bold text-white">TELEPATH</h1>
                 <div className="ml-4 flex items-center text-sm text-[#888888]">
                   <User className="h-4 w-4 mr-1" />
-                  <span className="text-[#00ff00]">{username}</span>@telepath
+                  <span className="text-white">{username}</span>@telepath
                 </div>
               </div>
-              <Button variant="ghost" className="text-[#888888] hover:text-[#00ff00]" onClick={handleLogout}>
+              <Button variant="ghost" className="text-[#888888] hover:text-white" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" /> LOGOUT
               </Button>
             </header>
@@ -199,7 +199,7 @@ export default function Dashboard() {
                   {/* Sidebar de Contatos */}
                   <Card className="md:col-span-1 bg-[#121212] border-[#333333]">
                     <div className="p-4 border-b border-[#333333]">
-                      <h2 className="text-lg font-bold text-[#00ff00]">CONTACTS</h2>
+                      <h2 className="text-lg font-bold text-white">CONTACTS</h2>
                     </div>
                     <div className="p-4 space-y-2">
                       {loading ? (
@@ -213,8 +213,8 @@ export default function Dashboard() {
                             variant={selectedContact === contact.id ? "default" : "ghost"}
                             className={`w-full justify-start ${
                               selectedContact === contact.id
-                                ? "bg-[#333333] text-[#00ff00] border border-[#00ff00]"
-                                : "text-white hover:bg-[#1e1e1e] hover:text-[#00ff00]"
+                                ? "bg-[#333333] text-white border border-white"
+                                : "text-white hover:bg-[#1e1e1e] hover:text-white"
                             }`}
                             onClick={() => handleSelectContact(contact)}
                           >
@@ -227,7 +227,7 @@ export default function Dashboard() {
                       {showAddContact ? (
                         <div className="space-y-3 w-full">
                           <div>
-                            <Label htmlFor="new-contact-username" className="text-[#00ff00] mb-1 block text-sm">
+                            <Label htmlFor="new-contact-username" className="text-white mb-1 block text-sm">
                               USERNAME:
                             </Label>
                             <Input
@@ -239,7 +239,7 @@ export default function Dashboard() {
                             />
                           </div>
                           <div>
-                            <Label htmlFor="new-contact-name" className="text-[#00ff00] mb-1 block text-sm">
+                            <Label htmlFor="new-contact-name" className="text-white mb-1 block text-sm">
                               DISPLAY NAME (OPTIONAL):
                             </Label>
                             <Input
@@ -299,6 +299,11 @@ export default function Dashboard() {
                 <KeyManager />
               </TabsContent>
             </Tabs>
+
+            <div className="mt-8 text-center text-xs text-[#888888]">
+              <p>All communications are encrypted and automatically deleted after reading.</p>
+              <p className="mt-1">© 2025 TELEPATH SECURE COMMUNICATIONS</p>
+            </div>
           </div>
         </div>
       </div>

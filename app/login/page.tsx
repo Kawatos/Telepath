@@ -128,12 +128,12 @@ export default function LoginPage() {
         </div>
 
         <div className="terminal-content p-6">
-          <Link href="/" className="flex items-center text-[#00ff00] mb-6 hover:underline">
+          <Link href="/" className="flex items-center text-white mb-6 hover:underline">
             <ArrowLeft className="mr-2 h-4 w-4" />
             RETURN TO MAIN TERMINAL
           </Link>
 
-          <h1 className="text-2xl font-bold mb-6 text-center text-[#00ff00]">TELEPATH AUTHENTICATION</h1>
+          <h1 className="text-2xl font-bold mb-6 text-center text-white">TELEPATH AUTHENTICATION</h1>
 
           {authStep === "initial" ? (
             <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -149,7 +149,7 @@ export default function LoginPage() {
               <TabsContent value="login">
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-[#00ff00]">
+                    <Label htmlFor="email" className="text-white">
                       EMAIL:
                     </Label>
                     <Input
@@ -164,7 +164,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="password" className="text-[#00ff00]">
+                    <Label htmlFor="password" className="text-white">
                       PASSWORD:
                     </Label>
                     <Input
@@ -187,7 +187,7 @@ export default function LoginPage() {
               <TabsContent value="signup">
                 <form onSubmit={handleSignup} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username" className="text-[#00ff00]">
+                    <Label htmlFor="username" className="text-white">
                       USERNAME:
                     </Label>
                     <Input
@@ -202,7 +202,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email" className="text-[#00ff00]">
+                    <Label htmlFor="signup-email" className="text-white">
                       EMAIL:
                     </Label>
                     <Input
@@ -217,7 +217,7 @@ export default function LoginPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password" className="text-[#00ff00]">
+                    <Label htmlFor="signup-password" className="text-white">
                       PASSWORD:
                     </Label>
                     <Input
@@ -241,14 +241,14 @@ export default function LoginPage() {
             <div className="terminal-process-output bg-black p-4 rounded font-mono text-sm h-64 overflow-auto">
               {authMessage.split("\n").map((line, i) => (
                 <div key={i} className="mb-2">
-                  <span className="text-[#00ff00]">$</span> {line}
+                  <span className="text-white">$</span> {line}
                   {i === authMessage.split("\n").length - 1 && authStep === "processing" && (
                     <span className="terminal-cursor"></span>
                   )}
                 </div>
               ))}
 
-              {authStep === "success" && <div className="text-[#00ff00] mt-4">Redirecting to secure terminal...</div>}
+              {authStep === "success" && <div className="text-white mt-4">Redirecting to secure terminal...</div>}
 
               {authStep === "error" && (
                 <div className="text-red-500 mt-4">Authentication failed. Returning to login screen...</div>
@@ -257,8 +257,8 @@ export default function LoginPage() {
           )}
 
           <div className="mt-6 text-center text-xs text-[#888888]">
-            <p>TELEPATH SECURE COMMUNICATIONS SYSTEM</p>
-            <p className="mt-1">ALL ACTIVITIES ARE ENCRYPTED AND LOGGED</p>
+            <p>All communications are encrypted and automatically deleted after reading.</p>
+            <p className="mt-1">© 2025 TELEPATH SECURE COMMUNICATIONS</p>
           </div>
         </div>
       </div>

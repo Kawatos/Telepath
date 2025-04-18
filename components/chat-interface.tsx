@@ -164,7 +164,7 @@ export default function ChatInterface({ contactId, contactUsername }: ChatInterf
       }
 
       // Criptografar a mensagem
-      const encryptedText = encryptMessage(newMessage)
+      const encryptedText = await encryptMessage(newMessage)
 
       // Adicionar mensagem ao banco de dados
       const { data: msgData, error: msgError } = await supabase
@@ -229,7 +229,7 @@ export default function ChatInterface({ contactId, contactUsername }: ChatInterf
   return (
     <>
       <div className="border-b border-[#333333] p-4">
-        <h2 className="text-lg font-bold text-[#00ff00]">
+        <h2 className="text-lg font-bold text-white">
           SECURE CHANNEL: <span className="text-white">{contactUsername}</span>
         </h2>
       </div>
@@ -246,7 +246,7 @@ export default function ChatInterface({ contactId, contactUsername }: ChatInterf
                 <div
                   className={`max-w-[70%] rounded p-3 ${
                     message.sender === "user"
-                      ? "bg-[#1a1a1a] border border-[#00ff00] text-white"
+                      ? "bg-[#1a1a1a] border border-white text-white"
                       : "bg-[#1a1a1a] border border-[#333333] text-white"
                   }`}
                 >
@@ -260,7 +260,7 @@ export default function ChatInterface({ contactId, contactUsername }: ChatInterf
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0 ml-2 text-[#00ff00] hover:text-white"
+                        className="h-6 w-6 p-0 ml-2 text-white hover:text-white"
                         onClick={() => handleMarkAsRead(message.id)}
                       >
                         <Check className="h-4 w-4" />

@@ -1,4 +1,4 @@
-// Versão melhorada das funções de criptografia
+// Implementação melhorada de criptografia
 
 /**
  * Gera uma chave de criptografia aleatória
@@ -11,34 +11,44 @@ export function generateRandomKey(): string {
 
 /**
  * Criptografa uma mensagem usando uma chave
- * Em um app real, isso usaria algoritmos de criptografia adequados
+ * Em um app real, isso usaria algoritmos de criptografia adequados como AES
  */
-export function encryptMessage(message: string, key = ""): string {
-  // Isso é um placeholder para criptografia real
-  // Em um app real, você usaria a chave para criptografar a mensagem
-  // usando algo como AES ou algoritmos de criptografia assimétrica
+export async function encryptMessage(message: string, key = ""): Promise<string> {
+  // Em um app real, você usaria a Web Crypto API para criptografia adequada
+  // Esta é uma simulação simplificada para demonstração
 
-  // Simulação simples de criptografia
-  const combinedKey = key || generateRandomKey().substring(0, 10)
-  const encoded = btoa(message)
-  return `${combinedKey}:${encoded}`
+  const encoder = new TextEncoder()
+  const data = encoder.encode(message)
+
+  // Usar a chave fornecida ou gerar uma nova
+  const useKey = key || generateRandomKey()
+
+  // Simular criptografia (em produção, use algoritmos reais como AES-GCM)
+  // Converter a mensagem para base64 e adicionar a chave como prefixo
+  const base64 = btoa(String.fromCharCode(...new Uint8Array(data)))
+  return `${useKey.substring(0, 16)}:${base64}`
 }
 
 /**
  * Descriptografa uma mensagem usando uma chave
- * Em um app real, isso usaria algoritmos de descriptografia adequados
  */
 export function decryptMessage(encryptedMessage: string, key = ""): string {
-  // Isso é um placeholder para descriptografia real
   try {
-    // Simulação simples de descriptografia
+    // Separar a chave e o conteúdo criptografado
     const parts = encryptedMessage.split(":")
     if (parts.length !== 2) {
       throw new Error("Formato de mensagem inválido")
     }
 
     // Em um app real, você verificaria se a chave corresponde
-    return atob(parts[1])
+    // e usaria a Web Crypto API para descriptografia
+
+    // Decodificar o conteúdo de base64
+    const base64 = parts[1]
+    const binary = atob(base64)
+
+    // Converter de binário para string
+    return binary
   } catch (e) {
     console.error("Falha ao descriptografar mensagem:", e)
     return "Falha ao descriptografar mensagem"
@@ -48,7 +58,22 @@ export function decryptMessage(encryptedMessage: string, key = ""): string {
 /**
  * Gera um hash seguro dos dados
  */
-export function generateHash(data: string): string {
-  // Em um app real, você usaria um algoritmo de hash adequado
-  return btoa(data)
+export async function generateHash(data: string): Promise<string> {
+  const encoder = new TextEncoder()
+  const dataBuffer = encoder.encode(data)
+
+  // Usar SHA-256 para gerar um hash seguro
+  const hashBuffer = await crypto.subtle.digest("SHA-256", dataBuffer)
+
+  // Converter para string hexadecimal
+  return Array.from(new Uint8Array(hashBuffer))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+}
+
+/**
+ * Verifica se duas chaves correspondem
+ */
+export async function verifyKeys(key1: string, key2: string): Promise<boolean> {
+  return (await generateHash(key1)) === (await generateHash(key2))
 }

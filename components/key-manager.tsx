@@ -188,7 +188,7 @@ export default function KeyManager() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <Card className="bg-[#121212] border-[#333333]">
         <CardHeader className="border-b border-[#333333]">
-          <CardTitle className="flex items-center gap-2 text-[#00ff00]">
+          <CardTitle className="flex items-center gap-2 text-white">
             <Key className="h-5 w-5" />
             ENCRYPTION KEYS
           </CardTitle>
@@ -206,7 +206,7 @@ export default function KeyManager() {
                 className="flex items-center justify-between p-3 bg-[#1a1a1a] border border-[#333333] rounded"
               >
                 <div className="overflow-hidden">
-                  <p className="font-mono text-sm truncate w-48 md:w-64 text-[#00ff00]">{key.key_value}</p>
+                  <p className="font-mono text-sm truncate w-48 md:w-64 text-white">{key.key_value}</p>
                   <p className="text-xs text-[#888888]">
                     {key.name} • {new Date(key.created_at).toLocaleDateString()}
                   </p>
@@ -216,7 +216,7 @@ export default function KeyManager() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleCopyKey(key.id, key.key_value)}
-                    className="text-[#888888] hover:text-[#00ff00]"
+                    className="text-[#888888] hover:text-white"
                   >
                     {copiedKeyId === key.id ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -241,7 +241,7 @@ export default function KeyManager() {
 
       <Card className="bg-[#121212] border-[#333333]">
         <CardHeader className="border-b border-[#333333]">
-          <CardTitle className="flex items-center gap-2 text-[#00ff00]">
+          <CardTitle className="flex items-center gap-2 text-white">
             <RefreshCw className="h-5 w-5" />
             ADD CONTACT KEY
           </CardTitle>
@@ -250,7 +250,7 @@ export default function KeyManager() {
         <CardContent className="p-4">
           <div className="space-y-4">
             <div>
-              <Label htmlFor="contact-username" className="text-[#00ff00] mb-2 block">
+              <Label htmlFor="contact-username" className="text-white mb-2 block">
                 CONTACT USERNAME:
               </Label>
               <Input
@@ -263,7 +263,7 @@ export default function KeyManager() {
             </div>
 
             <div>
-              <Label htmlFor="contact-key" className="text-[#00ff00] mb-2 block">
+              <Label htmlFor="contact-key" className="text-white mb-2 block">
                 CONTACT KEY (OPTIONAL):
               </Label>
               <Input

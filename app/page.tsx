@@ -17,7 +17,7 @@ export default function Home() {
 
         <div className="terminal-content p-6 md:p-8">
           <div className="mb-8 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2 terminal-text-green">TELEPATH</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2 text-white">TELEPATH</h1>
             <div className="flex justify-center mb-4">
               <div className="h-[1px] w-32 bg-[#333333]"></div>
             </div>
@@ -25,18 +25,16 @@ export default function Home() {
 
             <div className="space-y-4 mb-8 text-left max-w-xl mx-auto">
               <div className="terminal-message">
-                <span className="terminal-text-green">$</span> Initializing secure communication channel...
+                <span className="text-white">$</span> Initializing secure communication channel...
               </div>
               <div className="terminal-message">
-                <span className="terminal-text-green">$</span> End-to-end encryption:{" "}
-                <span className="terminal-text-green">ENABLED</span>
+                <span className="text-white">$</span> End-to-end encryption: <span className="text-white">ENABLED</span>
               </div>
               <div className="terminal-message">
-                <span className="terminal-text-green">$</span> Message persistence:{" "}
-                <span className="terminal-text-green">EPHEMERAL</span>
+                <span className="text-white">$</span> Message persistence: <span className="text-white">EPHEMERAL</span>
               </div>
               <div className="terminal-message">
-                <span className="terminal-text-green">$</span> System ready. Awaiting user authentication...
+                <span className="text-white">$</span> System ready. Awaiting user authentication...
               </div>
             </div>
           </div>
@@ -48,7 +46,7 @@ export default function Home() {
 
             <div className="text-sm text-[#888888] mt-8 text-center">
               <p>All communications are encrypted and automatically deleted after reading.</p>
-              <p className="mt-2">© {new Date().getFullYear()} TELEPATH SECURE COMMUNICATIONS</p>
+              <p className="mt-2">© 2025 TELEPATH SECURE COMMUNICATIONS</p>
             </div>
           </div>
         </div>
