@@ -30,6 +30,8 @@ export interface Database {
           key_value: string
           name: string | null
           created_at: string
+          is_public: boolean
+          share_username: boolean
         }
         Insert: {
           id?: string
@@ -37,6 +39,8 @@ export interface Database {
           key_value: string
           name?: string | null
           created_at?: string
+          is_public?: boolean
+          share_username?: boolean
         }
         Update: {
           id?: string
@@ -44,6 +48,8 @@ export interface Database {
           key_value?: string
           name?: string | null
           created_at?: string
+          is_public?: boolean
+          share_username?: boolean
         }
       }
       contacts: {

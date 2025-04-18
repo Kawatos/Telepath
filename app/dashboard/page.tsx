@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LogOut, User, Plus } from "lucide-react"
+import { LogOut, User, Plus, RefreshCw } from "lucide-react"
 import { useRouter } from "next/navigation"
 import ChatInterface from "@/components/chat-interface"
 import KeyManager from "@/components/key-manager"
@@ -58,16 +58,7 @@ export default function Dashboard() {
         setUsername(userData.username)
 
         // Carregar contatos
-        const { data: contactsData, error: contactsError } = await supabase
-          .from("contacts")
-          .select("*")
-          .order("created_at", { ascending: false })
-
-        if (contactsError) {
-          throw contactsError
-        }
-
-        setContacts(contactsData || [])
+        loadContacts()
       } catch (error: any) {
         toast({
           title: "Erro ao carregar dados",
@@ -81,6 +72,27 @@ export default function Dashboard() {
 
     checkAuth()
   }, [supabase, router, toast])
+
+  const loadContacts = async () => {
+    try {
+      const { data: contactsData, error: contactsError } = await supabase
+        .from("contacts")
+        .select("*")
+        .order("created_at", { ascending: false })
+
+      if (contactsError) {
+        throw contactsError
+      }
+
+      setContacts(contactsData || [])
+    } catch (error: any) {
+      toast({
+        title: "Erro ao carregar contatos",
+        description: error.message,
+        variant: "destructive",
+      })
+    }
+  }
 
   const handleLogout = async () => {
     try {
@@ -156,6 +168,18 @@ export default function Dashboard() {
     setSelectedContactUsername(contact.contact_username)
   }
 
+  const handleDeleteConversation = () => {
+    // Recarregar contatos após excluir conversa
+    loadContacts()
+    setSelectedContact(null)
+    setSelectedContactUsername("")
+  }
+
+  const handleRefreshContacts = () => {
+    setLoading(true)
+    loadContacts().finally(() => setLoading(false))
+  }
+
   return (
     <div className="min-h-screen bg-black">
       <div className="container mx-auto p-4">
@@ -198,8 +222,16 @@ export default function Dashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                   {/* Sidebar de Contatos */}
                   <Card className="md:col-span-1 bg-[#121212] border-[#333333]">
-                    <div className="p-4 border-b border-[#333333]">
+                    <div className="p-4 border-b border-[#333333] flex justify-between items-center">
                       <h2 className="text-lg font-bold text-white">CONTACTS</h2>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-[#888888] hover:text-white h-8 w-8 p-0"
+                        onClick={handleRefreshContacts}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
                     </div>
                     <div className="p-4 space-y-2">
                       {loading ? (
@@ -282,7 +314,11 @@ export default function Dashboard() {
                   {/* Área de Chat */}
                   <Card className="md:col-span-3 bg-[#121212] border-[#333333]">
                     {selectedContact ? (
-                      <ChatInterface contactId={selectedContact} contactUsername={selectedContactUsername} />
+                      <ChatInterface
+                        contactId={selectedContact}
+                        contactUsername={selectedContactUsername}
+                        onDeleteConversation={handleDeleteConversation}
+                      />
                     ) : (
                       <div className="h-96 flex items-center justify-center text-[#888888] p-4">
                         <div className="text-center">
