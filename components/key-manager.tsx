@@ -93,6 +93,9 @@ export default function KeyManager() {
     loadKeys()
   }, [supabase, toast])
 
+  // Modifique a função handleCreatePersonalKey para verificar se o usuário existe na tabela users
+  // e garantir que o ID do usuário esteja no formato correto
+
   const handleCreatePersonalKey = async () => {
     try {
       setLoading(true)
@@ -100,6 +103,18 @@ export default function KeyManager() {
 
       if (!userData.user) {
         throw new Error("Usuário não autenticado")
+      }
+
+      // Verificar se o usuário existe na tabela users
+      const { data: userExists, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", userData.user.id)
+        .single()
+
+      if (userError) {
+        console.error("Erro ao verificar usuário:", userError)
+        throw new Error("Usuário não encontrado no banco de dados. Por favor, faça logout e login novamente.")
       }
 
       // Se já existe uma chave pessoal, excluir antes de criar uma nova
@@ -119,7 +134,7 @@ export default function KeyManager() {
       const { data, error } = await supabase
         .from("encryption_keys")
         .insert({
-          user_id: userData.user.id,
+          user_id: userExists.id, // Usar o ID verificado da tabela users
           key_value: newKey,
           name: "PERSONAL_KEY",
           is_public: isPublic,
@@ -129,6 +144,7 @@ export default function KeyManager() {
         .single()
 
       if (error) {
+        console.error("Erro ao inserir chave:", error)
         throw error
       }
 
@@ -188,6 +204,8 @@ export default function KeyManager() {
     }
   }
 
+  // Também modifique a função handleCreateKey para garantir a mesma verificação
+
   const handleCreateKey = async () => {
     try {
       const { data: userData } = await supabase.auth.getUser()
@@ -196,13 +214,25 @@ export default function KeyManager() {
         throw new Error("Usuário não autenticado")
       }
 
+      // Verificar se o usuário existe na tabela users
+      const { data: userExists, error: userError } = await supabase
+        .from("users")
+        .select("id")
+        .eq("id", userData.user.id)
+        .single()
+
+      if (userError) {
+        console.error("Erro ao verificar usuário:", userError)
+        throw new Error("Usuário não encontrado no banco de dados. Por favor, faça logout e login novamente.")
+      }
+
       const newKey = generateRandomKey()
       const keyName = newKeyName.trim() || `KEY_${keys.length + 1}`
 
       const { data, error } = await supabase
         .from("encryption_keys")
         .insert({
-          user_id: userData.user.id,
+          user_id: userExists.id, // Usar o ID verificado da tabela users
           key_value: newKey,
           name: keyName,
           is_public: false,
@@ -212,6 +242,7 @@ export default function KeyManager() {
         .single()
 
       if (error) {
+        console.error("Erro ao inserir chave:", error)
         throw error
       }
 
