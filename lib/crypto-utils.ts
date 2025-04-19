@@ -6,19 +6,25 @@
  * Onde X são caracteres alfanuméricos
  */
 export function generateRandomKey(): string {
-  // Gerar um ID único baseado em timestamp e valores aleatórios
-  const timestamp = Date.now().toString(36)
-  const randomPart = Math.random().toString(36).substring(2, 15)
-  const baseKey = `${timestamp}${randomPart}`.toUpperCase()
-
-  // Formatar a chave no estilo TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX
-  const segments = ["TLPTH"]
-  for (let i = 0; i < 5; i++) {
-    const start = i * 4
-    segments.push(baseKey.substring(start, start + 4).padEnd(4, "0"))
+  // Função para gerar segmentos aleatórios de caracteres alfanuméricos
+  const generateSegment = (length: number) => {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    let result = ""
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
   }
 
-  return segments.join("-")
+  // Formatar a chave no estilo TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX
+  return [
+    "TLPTH",
+    generateSegment(4),
+    generateSegment(4),
+    generateSegment(4),
+    generateSegment(4),
+    generateSegment(4),
+  ].join("-")
 }
 
 /**

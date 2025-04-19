@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogClose,
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -45,71 +46,76 @@ export default function KeyManager() {
   const [searchLoading, setSearchLoading] = useState(false)
   const [copiedKeyId, setCopiedKeyId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [regenerateDialogOpen, setRegenerateDialogOpen] = useState(false)
   const supabase = getSupabaseClient()
   const { toast } = useToast()
 
   // Carregar chaves do usuário
-  useEffect(() => {
-    const loadKeys = async () => {
-      try {
-        const { data: userData } = await supabase.auth.getUser()
+  const loadKeys = async () => {
+    try {
+      setLoading(true)
+      const { data: userData } = await supabase.auth.getUser()
 
-        if (!userData.user) {
-          return
-        }
-
-        // Carregar todas as chaves
-        const { data, error } = await supabase
-          .from("encryption_keys")
-          .select("*")
-          .eq("user_id", userData.user.id)
-          .order("created_at", { ascending: false })
-
-        if (error) {
-          throw error
-        }
-
-        // Verificar se existe uma chave pessoal
-        const personalKeyData = data?.find((key) => key.name === "PERSONAL_KEY") || null
-        setPersonalKey(personalKeyData)
-
-        // Filtrar para não mostrar a chave pessoal na lista geral
-        const otherKeys = data?.filter((key) => key.name !== "PERSONAL_KEY") || []
-        setKeys(otherKeys)
-      } catch (error: any) {
-        toast({
-          title: "Erro ao carregar chaves",
-          description: error.message,
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
+      if (!userData.user) {
+        return
       }
-    }
 
+      // Carregar todas as chaves
+      const { data, error } = await supabase
+        .from("encryption_keys")
+        .select("*")
+        .eq("user_id", userData.user.id)
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      // Verificar se existe uma chave pessoal
+      const personalKeyData = data?.find((key) => key.name === "PERSONAL_KEY") || null
+      setPersonalKey(personalKeyData)
+
+      // Filtrar para não mostrar a chave pessoal na lista geral
+      const otherKeys = data?.filter((key) => key.name !== "PERSONAL_KEY") || []
+      setKeys(otherKeys)
+    } catch (error: any) {
+      toast({
+        title: "Erro ao carregar chaves",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     loadKeys()
   }, [supabase, toast])
 
   const handleCreatePersonalKey = async () => {
     try {
+      setLoading(true)
       const { data: userData } = await supabase.auth.getUser()
 
       if (!userData.user) {
         throw new Error("Usuário não autenticado")
       }
 
-      // Se já existe uma chave pessoal, perguntar se deseja substituir
+      // Se já existe uma chave pessoal, excluir antes de criar uma nova
       if (personalKey) {
-        if (!confirm("Você já possui uma chave pessoal. Criar uma nova irá substituir a atual. Continuar?")) {
-          return
-        }
+        const { error: deleteError } = await supabase.from("encryption_keys").delete().eq("id", personalKey.id)
 
-        // Excluir a chave pessoal atual
-        await supabase.from("encryption_keys").delete().eq("id", personalKey.id)
+        if (deleteError) {
+          throw deleteError
+        }
       }
 
+      // Gerar nova chave
       const newKey = generateRandomKey()
+      console.log("Nova chave gerada:", newKey)
 
+      // Inserir nova chave no banco de dados
       const { data, error } = await supabase
         .from("encryption_keys")
         .insert({
@@ -127,17 +133,21 @@ export default function KeyManager() {
       }
 
       setPersonalKey(data)
+      setRegenerateDialogOpen(false)
 
       toast({
         title: "Chave pessoal criada",
         description: "Sua chave pessoal foi criada com sucesso.",
       })
     } catch (error: any) {
+      console.error("Erro ao criar chave pessoal:", error)
       toast({
         title: "Erro ao criar chave pessoal",
         description: error.message,
         variant: "destructive",
       })
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -453,7 +463,7 @@ export default function KeyManager() {
                     <p className="text-xs text-[#888888]">
                       Created: {new Date(personalKey.created_at).toLocaleDateString()}
                     </p>
-                    <Dialog>
+                    <Dialog open={regenerateDialogOpen} onOpenChange={setRegenerateDialogOpen}>
                       <DialogTrigger asChild>
                         <Button variant="outline" size="sm" className="terminal-button">
                           <RefreshCw className="h-4 w-4 mr-2" /> REGENERATE
@@ -468,11 +478,17 @@ export default function KeyManager() {
                           </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                          <Button variant="outline" className="terminal-button" onClick={() => {}}>
-                            CANCEL
-                          </Button>
-                          <Button className="terminal-button-primary" onClick={handleCreatePersonalKey}>
-                            REGENERATE KEY
+                          <DialogClose asChild>
+                            <Button variant="outline" className="terminal-button">
+                              CANCEL
+                            </Button>
+                          </DialogClose>
+                          <Button
+                            className="terminal-button-primary"
+                            onClick={handleCreatePersonalKey}
+                            disabled={loading}
+                          >
+                            {loading ? "GENERATING..." : "REGENERATE KEY"}
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -512,8 +528,18 @@ export default function KeyManager() {
                     </div>
                   </div>
 
-                  <Button onClick={handleCreatePersonalKey} className="w-full terminal-button-primary mt-4">
-                    <Key className="mr-2 h-4 w-4" /> GENERATE PERSONAL KEY
+                  <Button
+                    onClick={handleCreatePersonalKey}
+                    className="w-full terminal-button-primary mt-4"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <span>GENERATING KEY...</span>
+                    ) : (
+                      <>
+                        <Key className="mr-2 h-4 w-4" /> GENERATE PERSONAL KEY
+                      </>
+                    )}
                   </Button>
                 </div>
               )}
