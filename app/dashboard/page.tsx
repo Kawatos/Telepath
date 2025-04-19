@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LogOut, User, Plus, RefreshCw } from "lucide-react"
+import { LogOut, User, RefreshCw, Search } from "lucide-react"
 import { useRouter } from "next/navigation"
 import ChatInterface from "@/components/chat-interface"
 import KeyManager from "@/components/key-manager"
@@ -12,6 +12,7 @@ import { getSupabaseClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { isValidKey } from "@/lib/crypto-utils"
 
 interface Contact {
   id: string
@@ -25,9 +26,12 @@ export default function Dashboard() {
   const [selectedContact, setSelectedContact] = useState<string | null>(null)
   const [selectedContactUsername, setSelectedContactUsername] = useState<string>("")
   const [loading, setLoading] = useState(true)
-  const [newContactName, setNewContactName] = useState("")
-  const [newContactUsername, setNewContactUsername] = useState("")
-  const [showAddContact, setShowAddContact] = useState(false)
+  const [searchKey, setSearchKey] = useState("")
+  const [searchLoading, setSearchLoading] = useState(false)
+  const [searchResult, setSearchResult] = useState<{
+    username?: string
+    user_id?: string
+  } | null>(null)
   const [username, setUsername] = useState("")
   const router = useRouter()
   const supabase = getSupabaseClient()
@@ -107,27 +111,83 @@ export default function Dashboard() {
     }
   }
 
-  const handleAddContact = async () => {
+  const handleSearchKey = async () => {
+    if (!searchKey.trim()) {
+      toast({
+        title: "Chave inválida",
+        description: "Por favor, insira uma chave válida para pesquisar.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (!isValidKey(searchKey)) {
+      toast({
+        title: "Formato de chave inválido",
+        description: "A chave deve estar no formato TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setSearchLoading(true)
+    setSearchResult(null)
+
     try {
-      if (!newContactUsername.trim()) {
-        throw new Error("Nome de usuário é obrigatório")
+      // Buscar a chave no banco de dados
+      const { data, error } = await supabase
+        .from("encryption_keys")
+        .select("*, users:user_id(username, id)")
+        .eq("key_value", searchKey)
+        .eq("is_public", true)
+        .single()
+
+      if (error) {
+        throw new Error("Chave não encontrada ou não está disponível publicamente")
+      }
+
+      // Verificar se o usuário optou por compartilhar o nome de usuário
+      const result: any = {
+        user_id: data.user_id,
+      }
+
+      if (data.share_username) {
+        result.username = (data.users as any).username
+      }
+
+      setSearchResult(result)
+    } catch (error: any) {
+      toast({
+        title: "Erro ao buscar chave",
+        description: error.message,
+        variant: "destructive",
+      })
+    } finally {
+      setSearchLoading(false)
+    }
+  }
+
+  const handleAddContact = async () => {
+    if (!searchResult || !searchResult.user_id) {
+      return
+    }
+
+    try {
+      const { data: userData } = await supabase.auth.getUser()
+
+      if (!userData.user) {
+        throw new Error("Usuário não autenticado")
       }
 
       // Verificar se o usuário existe
       const { data: userExists, error: userError } = await supabase
         .from("users")
-        .select("id")
-        .eq("username", newContactUsername)
+        .select("username")
+        .eq("id", searchResult.user_id)
         .single()
 
       if (userError) {
         throw new Error("Usuário não encontrado")
-      }
-
-      const { data: userData } = await supabase.auth.getUser()
-
-      if (!userData.user) {
-        throw new Error("Usuário não autenticado")
       }
 
       // Adicionar contato
@@ -135,8 +195,8 @@ export default function Dashboard() {
         .from("contacts")
         .insert({
           user_id: userData.user.id,
-          contact_username: newContactUsername,
-          name: newContactName || newContactUsername,
+          contact_username: userExists.username,
+          name: searchResult.username || userExists.username,
         })
         .select()
         .single()
@@ -145,10 +205,12 @@ export default function Dashboard() {
         throw error
       }
 
+      // Atualizar a lista de contatos
       setContacts([data, ...contacts])
-      setNewContactName("")
-      setNewContactUsername("")
-      setShowAddContact(false)
+
+      // Limpar a pesquisa
+      setSearchKey("")
+      setSearchResult(null)
 
       toast({
         title: "Contato adicionado",
@@ -233,6 +295,46 @@ export default function Dashboard() {
                         <RefreshCw className="h-4 w-4" />
                       </Button>
                     </div>
+
+                    {/* Busca de contato por chave */}
+                    <div className="p-4 border-b border-[#333333]">
+                      <div className="space-y-2">
+                        <Label htmlFor="search-contact-key" className="text-white text-sm">
+                          ADD CONTACT BY KEY:
+                        </Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="search-contact-key"
+                            placeholder="TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX"
+                            value={searchKey}
+                            onChange={(e) => setSearchKey(e.target.value.toUpperCase())}
+                            className="terminal-input font-mono text-xs"
+                          />
+                          <Button
+                            onClick={handleSearchKey}
+                            className="terminal-button-primary"
+                            disabled={searchLoading}
+                          >
+                            <Search className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {searchResult && (
+                          <div className="mt-2 p-2 bg-[#1a1a1a] border border-[#333333] rounded">
+                            <p className="text-xs text-white mb-1">
+                              {searchResult.username ? `User found: ${searchResult.username}` : "Anonymous user found"}
+                            </p>
+                            <Button
+                              onClick={handleAddContact}
+                              className="w-full terminal-button-primary text-xs py-1 h-auto"
+                            >
+                              ADD CONTACT
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     <div className="p-4 space-y-2">
                       {loading ? (
                         <p className="text-center py-4 text-[#888888]">Loading contacts...</p>
@@ -253,60 +355,6 @@ export default function Dashboard() {
                             {contact.name || contact.contact_username}
                           </Button>
                         ))
-                      )}
-                    </div>
-                    <div className="p-4 border-t border-[#333333]">
-                      {showAddContact ? (
-                        <div className="space-y-3 w-full">
-                          <div>
-                            <Label htmlFor="new-contact-username" className="text-white mb-1 block text-sm">
-                              USERNAME:
-                            </Label>
-                            <Input
-                              id="new-contact-username"
-                              value={newContactUsername}
-                              onChange={(e) => setNewContactUsername(e.target.value)}
-                              className="terminal-input"
-                              placeholder="username"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor="new-contact-name" className="text-white mb-1 block text-sm">
-                              DISPLAY NAME (OPTIONAL):
-                            </Label>
-                            <Input
-                              id="new-contact-name"
-                              value={newContactName}
-                              onChange={(e) => setNewContactName(e.target.value)}
-                              className="terminal-input"
-                              placeholder="display name"
-                            />
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="default"
-                              className="flex-1 terminal-button-primary"
-                              onClick={handleAddContact}
-                            >
-                              ADD
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="flex-1 terminal-button"
-                              onClick={() => setShowAddContact(false)}
-                            >
-                              CANCEL
-                            </Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          className="w-full terminal-button"
-                          onClick={() => setShowAddContact(true)}
-                        >
-                          <Plus className="mr-2 h-4 w-4" /> ADD CONTACT
-                        </Button>
                       )}
                     </div>
                   </Card>

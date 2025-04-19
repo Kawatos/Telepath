@@ -2,11 +2,23 @@
 
 /**
  * Gera uma chave de criptografia aleatória
+ * Formato: TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX
+ * Onde X são caracteres alfanuméricos
  */
 export function generateRandomKey(): string {
-  const array = new Uint8Array(32)
-  crypto.getRandomValues(array)
-  return Array.from(array, (byte) => byte.toString(16).padStart(2, "0")).join("")
+  // Gerar um ID único baseado em timestamp e valores aleatórios
+  const timestamp = Date.now().toString(36)
+  const randomPart = Math.random().toString(36).substring(2, 15)
+  const baseKey = `${timestamp}${randomPart}`.toUpperCase()
+
+  // Formatar a chave no estilo TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX
+  const segments = ["TLPTH"]
+  for (let i = 0; i < 5; i++) {
+    const start = i * 4
+    segments.push(baseKey.substring(start, start + 4).padEnd(4, "0"))
+  }
+
+  return segments.join("-")
 }
 
 /**
@@ -76,4 +88,13 @@ export async function generateHash(data: string): Promise<string> {
  */
 export async function verifyKeys(key1: string, key2: string): Promise<boolean> {
   return (await generateHash(key1)) === (await generateHash(key2))
+}
+
+/**
+ * Valida se uma chave está no formato correto
+ */
+export function isValidKey(key: string): boolean {
+  // Verificar se a chave está no formato TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX
+  const keyPattern = /^TLPTH-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/
+  return keyPattern.test(key)
 }

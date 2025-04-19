@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Key, Trash2, Copy, RefreshCw, Check, Share2, Shield } from "lucide-react"
+import { Plus, Key, Trash2, Copy, RefreshCw, Check, Shield, Search } from "lucide-react"
 import { getSupabaseClient } from "@/lib/supabase/client"
-import { generateRandomKey } from "@/lib/crypto-utils"
+import { generateRandomKey, isValidKey } from "@/lib/crypto-utils"
 import { useToast } from "@/hooks/use-toast"
 import { Switch } from "@/components/ui/switch"
 import {
@@ -266,6 +266,15 @@ export default function KeyManager() {
       return
     }
 
+    if (!isValidKey(searchKeyValue)) {
+      toast({
+        title: "Formato de chave inválido",
+        description: "A chave deve estar no formato TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX.",
+        variant: "destructive",
+      })
+      return
+    }
+
     setSearchLoading(true)
     setSearchResult(null)
 
@@ -273,7 +282,7 @@ export default function KeyManager() {
       // Buscar a chave no banco de dados
       const { data, error } = await supabase
         .from("encryption_keys")
-        .select("*, users:user_id(username)")
+        .select("*, users:user_id(username, id)")
         .eq("key_value", searchKeyValue)
         .eq("is_public", true)
         .single()
@@ -516,26 +525,26 @@ export default function KeyManager() {
           <Card className="bg-[#121212] border-[#333333]">
             <CardHeader className="border-b border-[#333333]">
               <CardTitle className="flex items-center gap-2 text-white">
-                <Share2 className="h-5 w-5" />
-                SEARCH ENCRYPTION KEY
+                <Search className="h-5 w-5" />
+                FIND CONTACT BY KEY
               </CardTitle>
             </CardHeader>
 
             <CardContent className="space-y-4 p-4">
               <div className="space-y-2">
                 <Label htmlFor="search-key" className="text-white">
-                  ENTER KEY:
+                  ENTER CONTACT KEY:
                 </Label>
                 <div className="flex gap-2">
                   <Input
                     id="search-key"
-                    placeholder="Paste key here..."
+                    placeholder="TLPTH-XXXX-XXXX-XXXX-XXXX-XXXX"
                     value={searchKeyValue}
-                    onChange={(e) => setSearchKeyValue(e.target.value)}
+                    onChange={(e) => setSearchKeyValue(e.target.value.toUpperCase())}
                     className="terminal-input font-mono flex-1"
                   />
                   <Button onClick={handleSearchKey} className="terminal-button-primary" disabled={searchLoading}>
-                    {searchLoading ? "SEARCHING..." : "SEARCH"}
+                    {searchLoading ? "..." : <Search className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
