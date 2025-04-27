@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --terminal-black: #000000;
+  --terminal-dark-gray: #121212;
+  --terminal-gray: #1e1e1e;
+  --terminal-light-gray: #333333;
+  --terminal-white: #ffffff;
+  --terminal-off-white: #f0f0f0;
+  --terminal-accent: #ffffff;
+  --terminal-font: "SF Mono", "Consolas", monospace;
+}
+
+body {
+  font-family: var(--terminal-font);
+  background-color: var(--terminal-black);
+  color: var(--terminal-white);
+}
+
+.terminal-container {
+  border: 1px solid var(--terminal-light-gray);
+  background-color: var(--terminal-dark-gray);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.terminal-header {
+  background-color: var(--terminal-light-gray);
+  padding: 8px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.terminal-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: var(--terminal-off-white);
+}
+
+.terminal-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.terminal-control {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-close {
+  background-color: #ff5f56;
+}
+
+.terminal-minimize {
+  background-color: #ffbd2e;
+}
+
+.terminal-maximize {
+  background-color: #27c93f;
+}
+
+.terminal-content {
+  padding: 16px;
+  font-family: var(--terminal-font);
+}
+
+.terminal-input {
+  background-color: var(--terminal-dark-gray);
+  color: var(--terminal-white);
+  border: 1px solid var(--terminal-light-gray);
+  font-family: var(--terminal-font);
+}
+
+.terminal-input:focus {
+  border-color: var(--terminal-white);
+  box-shadow: 0 0 0 1px var(--terminal-white);
+}
+
+.terminal-button {
+  background-color: var(--terminal-light-gray);
+  color: var(--terminal-white);
+  font-family: var(--terminal-font);
+  border: 1px solid var(--terminal-light-gray);
+  transition: all 0.2s;
+}
+
+.terminal-button:hover {
+  background-color: var(--terminal-gray);
+  border-color: var(--terminal-white);
+}
+
+.terminal-button-primary {
+  background-color: var(--terminal-light-gray);
+  color: var(--terminal-white);
+  border: 1px solid var(--terminal-white);
+}
+
+.terminal-button-primary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.terminal-text {
+  color: var(--terminal-white);
+  font-family: var(--terminal-font);
+}
+
+.terminal-text-accent {
+  color: var(--terminal-white);
+}
+
+.terminal-prompt::before {
+  content: "> ";
+  color: var(--terminal-white);
+}
+
+.terminal-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background-color: var(--terminal-white);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.terminal-message {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.terminal-message-user {
+  color: var(--terminal-white);
+}
+
+.terminal-message-system {
+  color: #888;
+  font-style: italic;
+}
+
+.terminal-message-contact {
+  color: var(--terminal-white);
+}
+
+.terminal-divider {
+  border-color: var(--terminal-light-gray);
+  margin: 16px 0;
+}
+
+.terminal-tab {
+  background-color: var(--terminal-dark-gray);
+  color: var(--terminal-white);
+  border: 1px solid var(--terminal-light-gray);
+  border-bottom: none;
+}
+
+.terminal-tab[data-state="active"] {
+  background-color: var(--terminal-light-gray);
+  color: var(--terminal-white);
+}
